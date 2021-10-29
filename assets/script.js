@@ -14,6 +14,7 @@ THEN the saved events persist*/
 
 //initialize object
 var schedule = {};
+var datetime = null;
 
 //function that updates textarea classes with color coding based on time of day
 function updateTimeColor() {
@@ -85,19 +86,28 @@ function loadTasks () {
 function main() {
     //load tasks into schedule
     loadTasks();
+
     //update time colors based on past, present or future
-    setInterval(updateTimeColor(), (1000*60*60));
+    setInterval(updateTimeColor(), (1000*60*30));
     //add click event to saveBtn elements
     $(document).on("click", ".saveBtn", saveTask);
 };
 
-
+function updateTime() {
+    //set currentDay = momentjs datetime
+    datetime.text(moment().format('MMMM Do YYYY, h:mm:ss a'));
+}
 
 
 //when page loads, display current date/time
 $(document).ready( function() {
+       //call main function
+       main();
     //replace text of #currentDay element with current date and time
-    $('#currentDay').text(moment().format('MMMM Do YYYY, h:mm:ss a'));
-    //call main function
-    main();
+    datetime = $('#currentDay');
+    //call updateTime function
+    updateTime();
+    //run updateTime function every second
+    setInterval(updateTime, 1000);
+ 
 });
