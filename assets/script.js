@@ -13,7 +13,7 @@ WHEN I refresh the page
 THEN the saved events persist*/
 
 //initialize object
-var schedule = {};
+var schedule = [];
 var datetime = null;
 
 //function that updates textarea classes with color coding based on time of day
@@ -22,7 +22,6 @@ function updateTimeColor() {
     var currHour = moment().format("H");
     //turn current hour into an integer
     currHour = parseInt(currHour);
-    console.log("currHour = " + currHour);
 
     //set schedule blocks counter to 0
     var schedBlocksNum = 0;
@@ -34,7 +33,6 @@ function updateTimeColor() {
         var idVal = $(".time-block").eq(schedBlocksNum).attr('id');
         //get partial value of id
         var idNum = idVal.replace('hour-','');
-        console.log(idNum);
         //check if currHour is greater, equal to, or less than value of number to determine past, present and future
         if (currHour > idNum) {
             //add past class to textarea in number element
@@ -58,27 +56,49 @@ function saveTask (event) {
     var schedHour = $(event.target).closest('.time-block').attr('id');
     //assign value of textarea element to value variable
     var schedValue = $(event.target).siblings('.description').val();
-    //add schedule block hour and value to object
-    schedule.cal.push({
+    //add schedule block hour and value to object in array
+    schedule.push({
         hour: schedHour,
         value: schedValue
     });
-    console.log(JSON.stringify(schedule));
-    //save in local storage
-    //localStorage.setItem(hour, value);
+    //save in local storage as "schedule" with stringify'd version of schedule array
+    localStorage.setItem("schedule", JSON.stringify(schedule));
 };
 
 //on page load, load tasks from local storage
 function loadTasks () {
+  
     //set object schedule = localStorage schedule
-    schedule = JSON.parse(localStorage.getItem(schedule));
+    schedule = JSON.parse(localStorage.getItem("schedule"));
 
-    //if schedule NOT in localStorage, create object schedule
+    //if schedule NOT in localStorage, create schedule array
     if (!schedule) {
-        schedule = {
-            cal: []
-        };
+        schedule = [];
+    } else {
+        //set schedule blocks counter to 0
+        var arrayNum = 0;
+        //get number of elements in schedule
+        var schedBlocks = document.querySelectorAll(".time-block");
+
+        //loop through elements in schedule
+        for (var i=0; i<schedBlocks.length; i++) {
+            //grab id hour attribute and set equal to variable
+            var idVal = $(".time-block").eq(i).attr('id');
+            //if the idValue of the timeblock = the hour value in the array object
+            if (idVal == schedule[arrayNum].hour) {
+                //on the timeblock divs child textarea, set value of textarea = key/value pair in array that matches
+                $(schedBlocks[i]).children('textarea').val(schedule[arrayNum].value);
+                //increment schedule array counter
+                arrayNum++;
+                //if next schedule array position doesnt exist, exit loop
+                if (!schedule[arrayNum]) {
+                    return;
+                }
+
+            }
+        }
     }
+
 
 };
 
@@ -86,9 +106,9 @@ function loadTasks () {
 function main() {
     //load tasks into schedule
     loadTasks();
-
+    updateTimeColor();
     //update time colors based on past, present or future
-    setInterval(updateTimeColor(), (1000*60*30));
+    setInterval(updateTimeColor, (1000*60*30));
     //add click event to saveBtn elements
     $(document).on("click", ".saveBtn", saveTask);
 };
@@ -101,8 +121,8 @@ function updateTime() {
 
 //when page loads, display current date/time
 $(document).ready( function() {
-       //call main function
-       main();
+    //call main function
+    main();
     //replace text of #currentDay element with current date and time
     datetime = $('#currentDay');
     //call updateTime function
