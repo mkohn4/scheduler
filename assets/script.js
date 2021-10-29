@@ -15,6 +15,7 @@ THEN the saved events persist*/
 //initialize object
 var schedule = {};
 
+//function that updates textarea classes with color coding based on time of day
 function updateTimeColor() {
     //set variable to get current hour with moment js
     var currHour = moment().format("H");
@@ -33,7 +34,7 @@ function updateTimeColor() {
         //get partial value of id
         var idNum = idVal.replace('hour-','');
         console.log(idNum);
-        //if current hour value is greater than idNum, time has passed
+        //check if currHour is greater, equal to, or less than value of number to determine past, present and future
         if (currHour > idNum) {
             //add past class to textarea in number element
             $(".time-block").eq(schedBlocksNum).children('.description').addClass('past');
@@ -44,7 +45,7 @@ function updateTimeColor() {
             //add future class to textarea in number element
             $(".time-block").eq(schedBlocksNum).children('.description').addClass('future');
         };
-
+        //increment schedBlocksNum so that loop will move to next element
         schedBlocksNum = schedBlocksNum+1;
     }
    
@@ -80,13 +81,12 @@ function loadTasks () {
 
 };
 
-//on page load
+//on page load call other functions
 function main() {
     //load tasks into schedule
     loadTasks();
     //update time colors based on past, present or future
-    updateTimeColor();
-
+    setInterval(updateTimeColor(), (1000*60*60));
     //add click event to saveBtn elements
     $(document).on("click", ".saveBtn", saveTask);
 };
@@ -98,7 +98,6 @@ function main() {
 $(document).ready( function() {
     //replace text of #currentDay element with current date and time
     $('#currentDay').text(moment().format('MMMM Do YYYY, h:mm:ss a'));
-    
     //call main function
     main();
 });
